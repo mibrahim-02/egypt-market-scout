@@ -8,11 +8,14 @@ const I18N = {
     placeholder: "ايفون 15 أو air fryer أو غسالة",
     search: "يلا",
     hint: "عربي أو إنجليزي. جوميا، أمازون مصر، نون، بي تك، تو بي، رنين وكارفور.",
-    categoriesTitle: "الأقسام",
+    categoriesTitle: "ضيّقي البحث",
     catSkin: "Skin Care",
     catFashion: "Fashion",
-    catSkinSub: "سيرم، غسول، كريم",
+    catSkinSub: "يشمل صيدليات مصر",
     catFashionSub: "لبس، شنط، شوز",
+    hintSkin: "البحث على العناية بالبشرة فقط، مع صيدليات مصر: العزبي، سيف، يداوي، شفاء و١٩٠١١.",
+    hintFashion: "البحث هيتضيّق على الأزياء واللبس في متاجر مصر.",
+    pharmacy: "صيدلية",
     disclaimer: "الأسعار من نتائج عامة داخل مصر. أكّدي في المتجر قبل الشراء.",
     addHome: "على الآيفون: Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية",
     searching: "بتسأل المتاجر يا عمّو…",
@@ -44,11 +47,14 @@ const I18N = {
     placeholder: "iPhone 15 or ايفون 15 or air fryer",
     search: "yalla",
     hint: "Arabic or English. Jumia, Amazon.eg, Noon, B.TECH, 2B, Raneen, Carrefour — Egypt only.",
-    categoriesTitle: "categories",
+    categoriesTitle: "tighten search",
     catSkin: "Skin Care",
     catFashion: "Fashion",
-    catSkinSub: "serum, cleanser, cream",
+    catSkinSub: "includes Egypt pharmacies",
     catFashionSub: "clothes, bags, shoes",
+    hintSkin: "Search is limited to skin care, including Egypt pharmacies: El Ezaby, Seif, Yodawy, Chefaa and 19011.",
+    hintFashion: "Search is limited to fashion and clothing in Egypt stores.",
+    pharmacy: "pharmacy",
     disclaimer: "Prices come from public Egypt listings. Confirm on the store before buying.",
     addHome: "On iPhone: Safari → Share → Add to Home Screen",
     searching: "asking the stores, 3mo…",
@@ -88,6 +94,13 @@ const STORES = [
   { id: "pricena", name: "Pricena EG", nameAr: "برايسينا", hosts: ["eg.pricena.com", "pricena.com"], search: (q) => `https://eg.pricena.com/en/search?q=${encodeURIComponent(q)}` },
   { id: "primetech", name: "Prime Tech", nameAr: "برايم تك", hosts: ["primetecheg.com"], search: (q) => `https://primetecheg.com/?s=${encodeURIComponent(q)}` },
   { id: "dubizzle", name: "Dubizzle", nameAr: "دوبيزل", hosts: ["dubizzle.com.eg", "olx.com.eg"], used: true, search: (q) => `https://www.dubizzle.com.eg/en/q/?search=${encodeURIComponent(q)}` },
+  { id: "elezaby", name: "El Ezaby", nameAr: "العزبي", pharmacy: true, hosts: ["elezabypharmacy.com", "elezaby.com"] },
+  { id: "seif", name: "Seif", nameAr: "سيف", pharmacy: true, hosts: ["seif-online.com", "seif.com.eg"] },
+  { id: "yodawy", name: "Yodawy", nameAr: "يداوي", pharmacy: true, hosts: ["yodawy.com"] },
+  { id: "chefaa", name: "Chefaa", nameAr: "شفاء", pharmacy: true, hosts: ["chefaa.com"] },
+  { id: "p19011", name: "19011", nameAr: "١٩٠١١", pharmacy: true, hosts: ["19011.com"] },
+  { id: "roshdy", name: "Roshdy", nameAr: "رشدي", pharmacy: true, hosts: ["roshdy.com.eg", "roshdyonline.com"] },
+  { id: "elagi", name: "3elagi", nameAr: "علاجي", pharmacy: true, hosts: ["3elagi.com"] },
 ];
 
 const BLOCKED_HOSTS = [
@@ -134,14 +147,16 @@ const CATALOG = [
   { ar: "ساعة آبل", en: "Apple Watch", aliases: ["ابل واتش", "apple watch"] },
   { ar: "عربية أطفال", en: "stroller", aliases: ["عربية بيبي"] },
   { ar: "حفاضات", en: "diapers", aliases: ["بامبرز", "pampers"] },
-  { ar: "عناية بالبشرة", en: "skin care", aliases: ["skincare", "سيرم"] },
-  { ar: "سيرم فيتامين سي", en: "vitamin C serum", aliases: ["vitamin c"] },
-  { ar: "غسول للبشرة", en: "face cleanser", aliases: ["cleanser", "غسول"] },
-  { ar: "واقي شمس", en: "sunscreen", aliases: ["sunscreen", "صن سكرين"] },
-  { ar: "أزياء", en: "fashion", aliases: ["ملابس", "لبس"] },
-  { ar: "فستان", en: "dress", aliases: ["dress"] },
-  { ar: "جينز", en: "jeans", aliases: ["بنطلون"] },
-  { ar: "حذاء رياضي", en: "sneakers", aliases: ["شوز", "كوتشي"] },
+  { ar: "عناية بالبشرة", en: "skin care", cat: "skincare", aliases: ["skincare", "سيرم"] },
+  { ar: "سيرم فيتامين سي", en: "vitamin C serum", cat: "skincare", aliases: ["vitamin c", "the ordinary"] },
+  { ar: "غسول للبشرة", en: "face cleanser", cat: "skincare", aliases: ["cleanser", "غسول", "cerave"] },
+  { ar: "واقي شمس", en: "sunscreen", cat: "skincare", aliases: ["sunscreen", "صن سكرين", "laroche"] },
+  { ar: "كريم مرطب", en: "moisturizer", cat: "skincare", aliases: ["moisturizer", "nivea"] },
+  { ar: "أزياء", en: "fashion", cat: "fashion", aliases: ["ملابس", "لبس"] },
+  { ar: "فستان", en: "dress", cat: "fashion", aliases: ["dress"] },
+  { ar: "جينز", en: "jeans", cat: "fashion", aliases: ["بنطلون"] },
+  { ar: "حذاء رياضي", en: "sneakers", cat: "fashion", aliases: ["شوز", "كوتشي"] },
+  { ar: "شنطة", en: "handbag", cat: "fashion", aliases: ["bag", "حقيبة"] },
 ];
 
 let lang = localStorage.getItem("qaren-lang") || "ar";
@@ -150,6 +165,7 @@ let sortKey = "price";
 let suggestItems = [];
 let suggestIndex = -1;
 let suggestTimer = 0;
+let selectedCategory = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -173,6 +189,7 @@ function applyI18n() {
   chips[0].textContent = dict.sortPrice;
   chips[1].textContent = dict.sortRating;
   chips[2].textContent = dict.sortReviews;
+  updateCategoryUi();
 }
 
 function westernizeDigits(text) {
@@ -208,15 +225,18 @@ function matchStore(url) {
   const path = parsed.pathname.toLowerCase();
   const href = parsed.href.toLowerCase();
   if (BLOCKED_HOSTS.some((blocked) => href.includes(blocked))) return null;
-  return STORES.find((store) => {
-    const hostOk = store.hosts.some((h) => host === h || host.endsWith(`.${h}`));
+  const store = STORES.find((item) => {
+    const hostOk = item.hosts.some((h) => host === h || host.endsWith(`.${h}`));
     if (!hostOk) return false;
-    if (store.pathIncludes && !store.pathIncludes.some((p) => path.includes(p) || href.includes(p))) {
+    if (item.pathIncludes && !item.pathIncludes.some((p) => path.includes(p) || href.includes(p))) {
       if (host === "noon.com") return false;
     }
     if (host.includes("pricena") && !href.includes("eg.pricena") && !path.includes("egypt")) return false;
     return true;
-  }) || null;
+  });
+  if (!store) return null;
+  if (store.pharmacy && selectedCategory && selectedCategory !== "skincare") return null;
+  return store;
 }
 
 function extractPrice(text) {
@@ -364,6 +384,21 @@ function uniqueByUrl(items) {
 }
 
 function searchQueries(query) {
+  const cat = CATEGORIES[selectedCategory];
+  const scoped = cat ? `${query} ${lang === "ar" ? cat.ar : cat.en}` : query;
+  if (selectedCategory === "skincare") {
+    return [
+      `${scoped} (${["site:jumia.com.eg", "site:amazon.eg", "site:noon.com/egypt", "site:carrefouregypt.com"].join(" OR ")}) EGP`,
+      `${scoped} صيدلية مصر (${["site:elezabypharmacy.com", "site:yodawy.com", "site:chefaa.com", "site:seif-online.com", "site:19011.com"].join(" OR ")})`,
+      `${query} skin care pharmacy Egypt El Ezaby Seif Yodawy Chefaa EGP`,
+    ];
+  }
+  if (selectedCategory === "fashion") {
+    return [
+      `${scoped} ملابس (${["site:jumia.com.eg", "site:amazon.eg", "site:noon.com/egypt"].join(" OR ")}) EGP`,
+      `${scoped} fashion Egypt سعر`,
+    ];
+  }
   const stores = [
     "site:jumia.com.eg",
     "site:amazon.eg",
@@ -377,8 +412,8 @@ function searchQueries(query) {
     "site:rayashop.com",
   ];
   return [
-    `${query} (${stores.slice(0, 5).join(" OR ")}) EGP`,
-    `${query} (${stores.slice(5).join(" OR ")}) سعر مصر`,
+    `${scoped} (${stores.slice(0, 5).join(" OR ")}) EGP`,
+    `${scoped} (${stores.slice(5).join(" OR ")}) سعر مصر`,
     `${query} سعر مصر جوميا نون أمازون بي تك تو بي`,
   ];
 }
@@ -423,8 +458,16 @@ function starString(rating) {
 }
 
 const CATEGORIES = {
-  skincare: { ar: "عناية بالبشرة", en: "skin care" },
-  fashion: { ar: "أزياء", en: "fashion" },
+  skincare: {
+    ar: "عناية بالبشرة",
+    en: "skin care",
+    exclude: ["iphone", "samsung galaxy", "laptop", "macbook", "playstation", "غسالة", "تكييف", "ثلاجة", "air fryer"],
+  },
+  fashion: {
+    ar: "أزياء",
+    en: "fashion",
+    exclude: ["iphone", "samsung galaxy", "laptop", "serum", "sunscreen", "pharmacy", "صيدلية", "غسالة"],
+  },
 };
 
 function ranked() {
@@ -470,7 +513,7 @@ function renderResults() {
     return `
       <article class="card">
         <div class="card-top">
-          <span class="store-pill${item.used ? " used" : ""}">${storeName}${item.used ? ` · ${dict.used}` : ""}</span>
+          <span class="store-pill${item.used ? " used" : ""}">${storeName}${item.store.pharmacy ? ` · ${dict.pharmacy}` : ""}${item.used ? ` · ${dict.used}` : ""}</span>
           <div class="price${isBest ? " best" : ""}">${formatPrice(item.price)}${isBest ? `<span class="best-badge">${dict.best}</span>` : ""}</div>
         </div>
         <h3 class="title">${escapeHtml(item.title)}</h3>
@@ -513,7 +556,7 @@ async function runSearch(query) {
   $("searchBtn").disabled = true;
   $("results").innerHTML = `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
   setStatus(dict.searching);
-  history.replaceState(null, "", `?q=${encodeURIComponent(query)}`);
+  history.replaceState(null, "", `?q=${encodeURIComponent(query)}${selectedCategory ? `&cat=${selectedCategory}` : ""}`);
 
   const collected = [];
   const queries = searchQueries(query);
@@ -538,7 +581,7 @@ async function runSearch(query) {
     mapped = [...byUrl.values()];
   }
 
-  listings = mapped.filter((item) => matchStore(item.url));
+  listings = mapped.filter((item) => matchStore(item.url) && matchesCategory(item));
   renderResults();
   $("searchBtn").disabled = false;
 
@@ -584,16 +627,17 @@ function rememberRecent(query) {
 }
 
 function localMatches(query) {
+  const pool = selectedCategory ? CATALOG.filter((item) => item.cat === selectedCategory) : CATALOG;
   const needle = normalizeText(query);
   if (!needle) {
-    return CATALOG.slice(0, 8).map((item) => ({
+    return pool.slice(0, 8).map((item) => ({
       query: catalogQuery(item),
       main: catalogQuery(item),
       sub: lang === "ar" ? item.en : item.ar,
       group: "popular",
     }));
   }
-  return CATALOG.filter((item) => catalogHaystack(item).includes(needle))
+  return pool.filter((item) => catalogHaystack(item).includes(needle))
     .slice(0, 8)
     .map((item) => ({
       query: catalogQuery(item),
@@ -703,6 +747,34 @@ async function updateSuggest() {
   }
 }
 
+function matchesCategory(listing) {
+  const cat = CATEGORIES[selectedCategory];
+  if (!cat) return true;
+  if (listing.store?.pharmacy && selectedCategory === "skincare") return true;
+  const blob = normalizeText(`${listing.title} ${listing.url} ${listing.snippet || ""}`);
+  return !cat.exclude.some((word) => blob.includes(normalizeText(word)));
+}
+
+function updateCategoryUi() {
+  document.querySelectorAll("[data-cat]").forEach((card) => {
+    const on = card.getAttribute("data-cat") === selectedCategory;
+    card.classList.toggle("active", on);
+    card.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  const hint = document.querySelector(".hint");
+  if (!hint) return;
+  if (selectedCategory === "skincare") hint.textContent = t().hintSkin;
+  else if (selectedCategory === "fashion") hint.textContent = t().hintFashion;
+  else hint.textContent = t().hint;
+}
+
+function setCategory(id) {
+  selectedCategory = selectedCategory === id ? null : id;
+  updateCategoryUi();
+  const query = $("q").value.trim();
+  if (query) runSearch(query);
+}
+
 function boot() {
   applyI18n();
   $("langBtn").addEventListener("click", () => {
@@ -726,13 +798,7 @@ function boot() {
     if (query) runSearch(query);
   });
   document.querySelectorAll("[data-cat]").forEach((card) => {
-    card.addEventListener("click", () => {
-      const cat = CATEGORIES[card.getAttribute("data-cat")];
-      if (!cat) return;
-      const query = lang === "ar" ? cat.ar : cat.en;
-      $("q").value = query;
-      runSearch(query);
-    });
+    card.addEventListener("click", () => setCategory(card.getAttribute("data-cat")));
   });
 
   const input = $("q");
@@ -769,6 +835,9 @@ function boot() {
   });
 
   const params = new URLSearchParams(location.search);
+  const presetCat = params.get("cat");
+  if (presetCat && CATEGORIES[presetCat]) selectedCategory = presetCat;
+  updateCategoryUi();
   const preset = params.get("q");
   if (preset) {
     $("q").value = preset;

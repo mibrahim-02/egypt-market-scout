@@ -356,6 +356,13 @@ h1 {
   box-shadow: 0 6px 0 #ffd0e0;
 }
 .category-card:active { transform: translateY(2px); box-shadow: 0 4px 0 #ffd0e0; }
+.category-card.active {
+  background: linear-gradient(180deg, #ffb3c6, var(--pink-deep));
+  color: #fff;
+  border-color: var(--pink-deep);
+  box-shadow: 0 6px 0 #c44b73;
+}
+.category-card.active .category-sub { color: #ffe8f0; }
 .category-emoji { font-size: 1.4rem; }
 .category-name { font-weight: 800; font-size: 0.95rem; }
 .category-sub { color: var(--muted); font-size: 0.72rem; }
@@ -388,7 +395,7 @@ h1 {
   body {
     background: radial-gradient(800px 400px at 80% -10%, #5a2438, transparent 50%), var(--bg-2);
   }
-  #q, .chip, .category-card, .lang-btn, .speech, .suggest-list { background: #2a1820; color: var(--ink); }
+  #q, .chip, .category-card:not(.active), .lang-btn, .speech, .suggest-list { background: #2a1820; color: var(--ink); }
   .speech::after { background: #2a1820; }
   .store-pill { background: #5a3344; color: #ffc2d6; }
 }

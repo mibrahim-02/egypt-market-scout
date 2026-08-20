@@ -1,4 +1,4 @@
-const CACHE = "bkam-y-3mo-v5";
+const CACHE = "bkam-y-3mo-v6";
 const ASSETS = ["./","index.html","styles.css","app.js","manifest.json","icon.png","mascot.png"];
 
 self.addEventListener("install", (event) => {
