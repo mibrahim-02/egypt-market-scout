@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F3D3A" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="قارن مصر" />
+  <meta name="description" content="Compare prices and reviews for any product across Egyptian e-commerce stores. بحث عربي أو إنجليزي." />
+  <title>قارن مصر · Egypt Market Scout</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <img src="./icon.svg" alt="" class="logo" />
+        <div>
+          <h1 data-i18n="title">قارن مصر</h1>
+          <p class="tag" data-i18n="tagline">أسعار ومراجعات من متاجر مصر فقط</p>
+        </div>
+      </div>
+      <button class="lang-btn" id="langBtn" type="button" aria-label="Switch language">EN</button>
+    </header>
+
+    <form class="search-card" id="searchForm">
+      <label for="q" data-i18n="searchLabel">اسم المنتج</label>
+      <div class="search-row">
+        <input
+          id="q"
+          name="q"
+          type="search"
+          enterkeyhint="search"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          data-i18n-placeholder="placeholder"
+          placeholder="ايفون 15 أو iPhone 15"
+          required
+        />
+        <button type="submit" id="searchBtn" data-i18n="search">بحث</button>
+      </div>
+      <p class="hint" data-i18n="hint">اكتب عربي أو إنجليزي. البحث يشمل جوميا، أمازون مصر، نون، بي تك، تو بي، رنين وكارفور.</p>
+    </form>
+
+    <section class="status" id="status" hidden></section>
+
+    <section class="summary" id="summary" hidden></section>
+
+    <section class="toolbar" id="toolbar" hidden>
+      <div class="sorts">
+        <button type="button" class="chip active" data-sort="price">السعر</button>
+        <button type="button" class="chip" data-sort="rating">التقييم</button>
+        <button type="button" class="chip" data-sort="reviews">عدد المراجعات</button>
+      </div>
+    </section>
+
+    <section class="results" id="results"></section>
+
+    <section class="stores" id="storeLinks">
+      <h2 data-i18n="storesTitle">افتح البحث مباشرة في المتاجر</h2>
+      <div class="store-grid" id="storeGrid"></div>
+    </section>
+
+    <footer class="foot">
+      <p data-i18n="disclaimer">الأسعار من نتائج بحث عامة داخل مصر. راجع المتجر قبل الشراء. غير تابع لأي منصة.</p>
+      <p class="add-home" data-i18n="addHome">على الآيفون: Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية</p>
+    </footer>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>

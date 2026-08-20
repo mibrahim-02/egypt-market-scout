@@ -1,0 +1,21 @@
+{
+  "name": "قارن مصر — Egypt Market Scout",
+  "short_name": "قارن مصر",
+  "description": "Compare product prices and reviews across Egyptian e-commerce stores.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F3D3A",
+  "theme_color": "#0F3D3A",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
