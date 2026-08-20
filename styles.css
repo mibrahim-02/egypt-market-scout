@@ -164,9 +164,14 @@ h1 {
   font-weight: 800;
   margin-bottom: 8px;
 }
-.search-row { display: flex; gap: 8px; }
-#q {
+.search-row { display: flex; gap: 8px; align-items: flex-start; }
+.suggest-wrap {
+  position: relative;
   flex: 1;
+  min-width: 0;
+}
+#q {
+  width: 100%;
   min-height: 52px;
   border: 2px solid var(--line);
   border-radius: 18px;
@@ -179,6 +184,50 @@ h1 {
   outline: none;
   border-color: var(--pink);
   box-shadow: 0 0 0 4px #ff8fab33;
+}
+.suggest-list {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  max-height: min(280px, 50vh);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.suggest-group {
+  margin: 4px 8px 2px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--pink-deep);
+  letter-spacing: 0.02em;
+}
+.suggest-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.suggest-list li[aria-selected="true"],
+.suggest-list li:active {
+  background: var(--peach);
+}
+.suggest-main {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+.suggest-sub {
+  color: var(--muted);
+  font-size: 0.75rem;
 }
 #searchBtn {
   min-width: 84px;
@@ -335,7 +384,7 @@ h1 {
   body {
     background: radial-gradient(800px 400px at 80% -10%, #5a2438, transparent 50%), var(--bg-2);
   }
-  #q, .chip, .store-grid a, .lang-btn, .speech { background: #2a1820; color: var(--ink); }
+  #q, .chip, .store-grid a, .lang-btn, .speech, .suggest-list { background: #2a1820; color: var(--ink); }
   .speech::after { background: #2a1820; }
   .store-pill { background: #5a3344; color: #ffc2d6; }
 }

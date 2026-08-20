@@ -28,6 +28,8 @@ const I18N = {
     reviews: (n) => `${n} مراجعة`,
     noRating: "مفيش تقييم ظاهر",
     egp: "ج.م",
+    recent: "بحثتي عنهم",
+    popular: "اختاري من هنا",
   },
   en: {
     title: "bkam y 3mo",
@@ -58,6 +60,8 @@ const I18N = {
     reviews: (n) => `${n} reviews`,
     noRating: "no public rating",
     egp: "EGP",
+    recent: "you searched",
+    popular: "pick one",
   },
 };
 
@@ -85,10 +89,51 @@ const BLOCKED_HOSTS = [
 ];
 
 const ARABIC_DIGITS = "٠١٢٣٤٥٦٧٨٩";
+const RECENT_KEY = "bkam-recent";
+
+const CATALOG = [
+  { ar: "آيفون 13", en: "iPhone 13", aliases: ["ايفون 13", "iphone13"] },
+  { ar: "آيفون 14", en: "iPhone 14", aliases: ["ايفون 14"] },
+  { ar: "آيفون 15", en: "iPhone 15", aliases: ["ايفون 15", "ايفون ١٥"] },
+  { ar: "آيفون 15 برو", en: "iPhone 15 Pro", aliases: ["ايفون 15 برو"] },
+  { ar: "آيفون 16", en: "iPhone 16", aliases: ["ايفون 16"] },
+  { ar: "آيفون 16 برو", en: "iPhone 16 Pro", aliases: ["ايفون 16 برو"] },
+  { ar: "آيفون 16 برو ماكس", en: "iPhone 16 Pro Max", aliases: ["ايفون 16 برو ماكس"] },
+  { ar: "آيفون 17", en: "iPhone 17", aliases: ["ايفون 17"] },
+  { ar: "سامسونج جالاكسي S24", en: "Samsung Galaxy S24", aliases: ["s24", "جالاكسي s24"] },
+  { ar: "سامسونج جالاكسي S25", en: "Samsung Galaxy S25", aliases: ["s25"] },
+  { ar: "سامسونج جالاكسي A55", en: "Samsung Galaxy A55", aliases: ["a55"] },
+  { ar: "ريدمي نوت 14", en: "Redmi Note 14", aliases: ["redmi", "شاومي"] },
+  { ar: "إيربودز برو", en: "AirPods Pro", aliases: ["ايربودز", "airpods"] },
+  { ar: "آيباد", en: "iPad", aliases: ["ايباد"] },
+  { ar: "ماك بوك إير", en: "MacBook Air", aliases: ["ماكبوك", "macbook"] },
+  { ar: "بلايستيشن 5", en: "PlayStation 5", aliases: ["ps5", "بلايستيشن"] },
+  { ar: "قلاية هوائية", en: "air fryer", aliases: ["اير فراير", "ايرفراير", "airfryer"] },
+  { ar: "غسالة فوق أوتوماتيك", en: "automatic washing machine", aliases: ["غسالة", "washing machine"] },
+  { ar: "تكييف 1.5 حصان", en: "1.5 HP air conditioner", aliases: ["تكييف", "تكييفه", "air conditioner", "ac"] },
+  { ar: "ثلاجة", en: "refrigerator", aliases: ["ثلاجه", "fridge"] },
+  { ar: "تلفزيون 55 بوصة", en: "55 inch TV", aliases: ["تلفزيون", "شاشة", "smart tv"] },
+  { ar: "مكنسة دايسون", en: "Dyson vacuum", aliases: ["دايسون", "dyson"] },
+  { ar: "سخان مياه", en: "water heater", aliases: ["سخان"] },
+  { ar: "بوتاجاز", en: "gas cooker", aliases: ["فرن", "stove"] },
+  { ar: "ميكروويف", en: "microwave", aliases: ["مايكروويف"] },
+  { ar: "خلاط", en: "blender", aliases: ["blender"] },
+  { ar: "مكنسة كهربائية", en: "vacuum cleaner", aliases: ["مكنسة"] },
+  { ar: "لابتوب جيمنج", en: "gaming laptop", aliases: ["لابتوب", "laptop"] },
+  { ar: "سماعات بلوتوث", en: "bluetooth headphones", aliases: ["سماعات", "headphones"] },
+  { ar: "باور بانك", en: "power bank", aliases: ["powerbank"] },
+  { ar: "شاحن آيفون", en: "iPhone charger", aliases: ["شاحن"] },
+  { ar: "ساعة آبل", en: "Apple Watch", aliases: ["ابل واتش", "apple watch"] },
+  { ar: "عربية أطفال", en: "stroller", aliases: ["عربية بيبي"] },
+  { ar: "حفاضات", en: "diapers", aliases: ["بامبرز", "pampers"] },
+];
 
 let lang = localStorage.getItem("qaren-lang") || "ar";
 let listings = [];
 let sortKey = "price";
+let suggestItems = [];
+let suggestIndex = -1;
+let suggestTimer = 0;
 
 const $ = (id) => document.getElementById(id);
 
@@ -449,6 +494,8 @@ function setStatus(message, isError = false) {
 
 async function runSearch(query) {
   const dict = t();
+  hideSuggest();
+  rememberRecent(query);
   listings = [];
   renderResults();
   renderStores(query);
@@ -493,6 +540,158 @@ async function runSearch(query) {
   setStatus(withPrice ? dict.found(listings.length) : dict.none);
 }
 
+function normalizeText(value) {
+  return westernizeDigits(value)
+    .toLowerCase()
+    .replace(/[أإآٱ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+function catalogQuery(item) {
+  return lang === "ar" ? item.ar : item.en;
+}
+
+function catalogHaystack(item) {
+  return normalizeText([item.ar, item.en, ...(item.aliases || [])].join(" "));
+}
+
+function loadRecents() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+    return Array.isArray(raw) ? raw.filter((item) => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function rememberRecent(query) {
+  const next = [query, ...loadRecents().filter((item) => normalizeText(item) !== normalizeText(query))].slice(0, 8);
+  localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+}
+
+function localMatches(query) {
+  const needle = normalizeText(query);
+  if (!needle) {
+    return CATALOG.slice(0, 8).map((item) => ({
+      query: catalogQuery(item),
+      main: catalogQuery(item),
+      sub: lang === "ar" ? item.en : item.ar,
+      group: "popular",
+    }));
+  }
+  return CATALOG.filter((item) => catalogHaystack(item).includes(needle))
+    .slice(0, 8)
+    .map((item) => ({
+      query: catalogQuery(item),
+      main: catalogQuery(item),
+      sub: lang === "ar" ? item.en : item.ar,
+      group: "popular",
+    }));
+}
+
+function recentMatches(query) {
+  const needle = normalizeText(query);
+  return loadRecents()
+    .filter((item) => !needle || normalizeText(item).includes(needle))
+    .slice(0, 5)
+    .map((item) => ({ query: item, main: item, sub: "", group: "recent" }));
+}
+
+async function remoteMatches(query) {
+  if (!query || query.length < 2) return [];
+  const url = `https://suggestqueries.google.com/complete/search?client=firefox&hl=${lang === "ar" ? "ar" : "en"}&gl=eg&q=${encodeURIComponent(query)}`;
+  const res = await fetch(url);
+  if (!res.ok) return [];
+  const data = await res.json();
+  const phrases = Array.isArray(data?.[1]) ? data[1] : [];
+  return phrases.slice(0, 6).map((phrase) => ({
+    query: String(phrase),
+    main: String(phrase),
+    sub: "",
+    group: "popular",
+  }));
+}
+
+function hideSuggest() {
+  const list = $("suggestList");
+  list.hidden = true;
+  list.innerHTML = "";
+  suggestItems = [];
+  suggestIndex = -1;
+  $("q").setAttribute("aria-expanded", "false");
+}
+
+function renderSuggest(groups) {
+  const list = $("suggestList");
+  const seen = new Set();
+  suggestItems = [];
+  const chunks = [];
+  for (const [group, items] of groups) {
+    const unique = items.filter((item) => {
+      const key = normalizeText(item.query);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    if (!unique.length) continue;
+    chunks.push(`<li class="suggest-group" role="presentation">${escapeHtml(t()[group] || group)}</li>`);
+    unique.forEach((item) => {
+      const index = suggestItems.length;
+      suggestItems.push(item);
+      chunks.push(`
+        <li role="option" data-index="${index}" aria-selected="false">
+          <span class="suggest-main">${escapeHtml(item.main)}</span>
+          ${item.sub ? `<span class="suggest-sub">${escapeHtml(item.sub)}</span>` : ""}
+        </li>
+      `);
+    });
+  }
+  if (!suggestItems.length) {
+    hideSuggest();
+    return;
+  }
+  list.innerHTML = chunks.join("");
+  list.hidden = false;
+  $("q").setAttribute("aria-expanded", "true");
+  suggestIndex = -1;
+}
+
+function markSuggest() {
+  $("suggestList").querySelectorAll("li[role='option']").forEach((el) => {
+    el.setAttribute("aria-selected", el.getAttribute("data-index") === String(suggestIndex) ? "true" : "false");
+  });
+}
+
+function pickSuggest(item) {
+  if (!item) return;
+  $("q").value = item.query;
+  hideSuggest();
+  runSearch(item.query);
+}
+
+async function updateSuggest() {
+  const query = $("q").value.trim();
+  const recents = recentMatches(query);
+  const local = localMatches(query);
+  renderSuggest([
+    ["recent", recents],
+    ["popular", local],
+  ]);
+  try {
+    const remote = await remoteMatches(query);
+    if ($("q").value.trim() !== query) return;
+    renderSuggest([
+      ["recent", recents],
+      ["popular", [...local, ...remote]],
+    ]);
+  } catch {
+    /* local suggestions are enough */
+  }
+}
+
 function boot() {
   applyI18n();
   $("langBtn").addEventListener("click", () => {
@@ -500,6 +699,7 @@ function boot() {
     localStorage.setItem("qaren-lang", lang);
     applyI18n();
     renderResults();
+    hideSuggest();
   });
   document.querySelectorAll("[data-sort]").forEach((chip) => {
     chip.addEventListener("click", () => {
@@ -510,9 +710,44 @@ function boot() {
   });
   $("searchForm").addEventListener("submit", (event) => {
     event.preventDefault();
+    hideSuggest();
     const query = $("q").value.trim();
     if (query) runSearch(query);
   });
+
+  const input = $("q");
+  input.addEventListener("focus", () => updateSuggest());
+  input.addEventListener("input", () => {
+    clearTimeout(suggestTimer);
+    suggestTimer = setTimeout(updateSuggest, 120);
+  });
+  input.addEventListener("keydown", (event) => {
+    if ($("suggestList").hidden || !suggestItems.length) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      suggestIndex = (suggestIndex + 1) % suggestItems.length;
+      markSuggest();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      suggestIndex = (suggestIndex - 1 + suggestItems.length) % suggestItems.length;
+      markSuggest();
+    } else if (event.key === "Enter" && suggestIndex >= 0) {
+      event.preventDefault();
+      pickSuggest(suggestItems[suggestIndex]);
+    } else if (event.key === "Escape") {
+      hideSuggest();
+    }
+  });
+  $("suggestList").addEventListener("pointerdown", (event) => {
+    const option = event.target.closest("li[data-index]");
+    if (!option) return;
+    event.preventDefault();
+    pickSuggest(suggestItems[Number(option.getAttribute("data-index"))]);
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!event.target.closest(".suggest-wrap")) hideSuggest();
+  });
+
   const params = new URLSearchParams(location.search);
   const preset = params.get("q");
   if (preset) {

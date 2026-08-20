@@ -39,18 +39,26 @@
     <form class="search-card" id="searchForm">
       <label for="q" data-i18n="searchLabel">هتشتري إيه؟</label>
       <div class="search-row">
-        <input
-          id="q"
-          name="q"
-          type="search"
-          enterkeyhint="search"
-          autocomplete="off"
-          autocapitalize="off"
-          spellcheck="false"
-          data-i18n-placeholder="placeholder"
-          placeholder="ايفون 15 أو air fryer"
-          required
-        />
+        <div class="suggest-wrap">
+          <input
+            id="q"
+            name="q"
+            type="search"
+            enterkeyhint="search"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            aria-controls="suggestList"
+            data-i18n-placeholder="placeholder"
+            placeholder="ايفون 15 أو air fryer"
+            required
+          />
+          <ul id="suggestList" class="suggest-list" role="listbox" hidden></ul>
+        </div>
         <button type="submit" id="searchBtn" data-i18n="search">يلا</button>
       </div>
       <p class="hint" data-i18n="hint">عربي أو إنجليزي. جوميا، أمازون مصر، نون، بي تك، تو بي، رنين وكارفور.</p>
