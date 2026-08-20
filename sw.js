@@ -1,5 +1,5 @@
-const CACHE = "qaren-masr-v1";
-const ASSETS = ["./","index.html","styles.css","app.js","manifest.json","icon.svg"];
+const CACHE = "bkam-y-3mo-v2";
+const ASSETS = ["./","index.html","styles.css","app.js","manifest.json","icon.png","mascot.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
