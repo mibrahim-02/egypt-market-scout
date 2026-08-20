@@ -92,15 +92,17 @@ h1 {
 
 .hero {
   display: grid;
-  grid-template-columns: 138px 1fr;
-  gap: 6px;
-  align-items: end;
-  margin: 4px 0 10px;
+  grid-template-columns: 84px 1fr;
+  gap: 8px;
+  align-items: center;
+  margin: 2px 0 8px;
 }
 .mascot {
-  width: 138px;
-  height: auto;
-  filter: drop-shadow(0 10px 16px rgba(240, 98, 146, 0.25));
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 6px 10px rgba(240, 98, 146, 0.22));
   animation: floaty 3.4s ease-in-out infinite;
 }
 @keyframes floaty {
