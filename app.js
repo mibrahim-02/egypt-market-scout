@@ -8,7 +8,11 @@ const I18N = {
     placeholder: "ايفون 15 أو air fryer أو غسالة",
     search: "يلا",
     hint: "عربي أو إنجليزي. جوميا، أمازون مصر، نون، بي تك، تو بي، رنين وكارفور.",
-    storesTitle: "أو افتحي المتاجر بنفسك",
+    categoriesTitle: "الأقسام",
+    catSkin: "Skin Care",
+    catFashion: "Fashion",
+    catSkinSub: "سيرم، غسول، كريم",
+    catFashionSub: "لبس، شنط، شوز",
     disclaimer: "الأسعار من نتائج عامة داخل مصر. أكّدي في المتجر قبل الشراء.",
     addHome: "على الآيفون: Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية",
     searching: "بتسأل المتاجر يا عمّو…",
@@ -40,7 +44,11 @@ const I18N = {
     placeholder: "iPhone 15 or ايفون 15 or air fryer",
     search: "yalla",
     hint: "Arabic or English. Jumia, Amazon.eg, Noon, B.TECH, 2B, Raneen, Carrefour — Egypt only.",
-    storesTitle: "or open the stores yourself",
+    categoriesTitle: "categories",
+    catSkin: "Skin Care",
+    catFashion: "Fashion",
+    catSkinSub: "serum, cleanser, cream",
+    catFashionSub: "clothes, bags, shoes",
     disclaimer: "Prices come from public Egypt listings. Confirm on the store before buying.",
     addHome: "On iPhone: Safari → Share → Add to Home Screen",
     searching: "asking the stores, 3mo…",
@@ -126,6 +134,14 @@ const CATALOG = [
   { ar: "ساعة آبل", en: "Apple Watch", aliases: ["ابل واتش", "apple watch"] },
   { ar: "عربية أطفال", en: "stroller", aliases: ["عربية بيبي"] },
   { ar: "حفاضات", en: "diapers", aliases: ["بامبرز", "pampers"] },
+  { ar: "عناية بالبشرة", en: "skin care", aliases: ["skincare", "سيرم"] },
+  { ar: "سيرم فيتامين سي", en: "vitamin C serum", aliases: ["vitamin c"] },
+  { ar: "غسول للبشرة", en: "face cleanser", aliases: ["cleanser", "غسول"] },
+  { ar: "واقي شمس", en: "sunscreen", aliases: ["sunscreen", "صن سكرين"] },
+  { ar: "أزياء", en: "fashion", aliases: ["ملابس", "لبس"] },
+  { ar: "فستان", en: "dress", aliases: ["dress"] },
+  { ar: "جينز", en: "jeans", aliases: ["بنطلون"] },
+  { ar: "حذاء رياضي", en: "sneakers", aliases: ["شوز", "كوتشي"] },
 ];
 
 let lang = localStorage.getItem("qaren-lang") || "ar";
@@ -157,7 +173,6 @@ function applyI18n() {
   chips[0].textContent = dict.sortPrice;
   chips[1].textContent = dict.sortRating;
   chips[2].textContent = dict.sortReviews;
-  renderStores($("q").value.trim() || "iPhone 15");
 }
 
 function westernizeDigits(text) {
@@ -407,13 +422,10 @@ function starString(rating) {
   return `${"★".repeat(full)}${"☆".repeat(5 - full)} ${rating.toFixed(1)}`;
 }
 
-function renderStores(query) {
-  const q = query || "iPhone 15";
-  $("storeGrid").innerHTML = STORES.map((store) => {
-    const label = lang === "ar" ? store.nameAr : store.name;
-    return `<a href="${store.search(q)}" target="_blank" rel="noopener">${label}</a>`;
-  }).join("");
-}
+const CATEGORIES = {
+  skincare: { ar: "عناية بالبشرة", en: "skin care" },
+  fashion: { ar: "أزياء", en: "fashion" },
+};
 
 function ranked() {
   const copy = listings.slice();
@@ -498,7 +510,6 @@ async function runSearch(query) {
   rememberRecent(query);
   listings = [];
   renderResults();
-  renderStores(query);
   $("searchBtn").disabled = true;
   $("results").innerHTML = `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
   setStatus(dict.searching);
@@ -713,6 +724,15 @@ function boot() {
     hideSuggest();
     const query = $("q").value.trim();
     if (query) runSearch(query);
+  });
+  document.querySelectorAll("[data-cat]").forEach((card) => {
+    card.addEventListener("click", () => {
+      const cat = CATEGORIES[card.getAttribute("data-cat")];
+      if (!cat) return;
+      const query = lang === "ar" ? cat.ar : cat.en;
+      $("q").value = query;
+      runSearch(query);
+    });
   });
 
   const input = $("q");
